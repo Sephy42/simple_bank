@@ -2,7 +2,7 @@ use crate::forms::Transaction;
 use crate::presenters::AccountPresenter;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct Account {
     pub transactions: Vec<Transaction>,
 }
@@ -18,8 +18,9 @@ impl Account {
         self.transactions.push(t);
     }
 
-    pub fn present(&self) -> AccountPresenter {
+    pub fn present(&self, id: usize) -> AccountPresenter {
         AccountPresenter {
+            id,
             transactions: self.transactions.clone(),
             total: self.total(),
         }

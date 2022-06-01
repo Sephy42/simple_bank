@@ -1,27 +1,43 @@
 use crate::account::Account;
 use crate::controllers::forms::Transaction;
 use crate::controllers::presenters::AccountPresenter;
+use crate::{Account, State};
 use actix_web::web;
 use actix_web::{get, post};
-use std::sync::RwLock;
 
-#[get("/total")]
-pub async fn get_total(state: web::Data<RwLock<Account>>) -> String {
-    state.read().unwrap().total().to_string()
+#[get("/{id}")]
+pub async fn show(
+    id: web::Path<usize>,
+    state: web::Data<State>,
+) -> Option<web::Json<AccountPresenter>> {
+    let lock = state.accounts.read().unwrap();
+    let account = lock.get(*id)?;
+    Some(web::Json(account.present(*id)))
 }
 
-#[get("/account")]
-pub async fn show(state: web::Data<RwLock<Account>>) -> web::Json<AccountPresenter> {
-    let lock = state.read().unwrap();
-    web::Json(lock.present())
-}
-
-#[post("/transfer")]
+#[post("/{id}/transfer")]
 pub async fn transfer(
-    state: web::Data<RwLock<Account>>,
+    id: web::Path<usize>,
+    state: web::Data<State>,
     transaction: web::Json<Transaction>,
-) -> web::Json<AccountPresenter> {
-    let mut lock = state.write().unwrap();
-    lock.add_transaction(transaction.into_inner());
-    web::Json(lock.present())
+) -> Option<web::Json<AccountPresenter>> {
+    let mut lock = state.accounts.write().unwrap();
+    let account = lock.get_mut(*id)?;
+    account.add_transaction(transaction.into_inner());
+    Some(web::Json(account.present(*id)))
 }
+
+#[post("")]
+pub async fn create(state: web::Data<State>) -> web::Json<AccountPresenter> {
+    let mut lock = state.accounts.write().unwrap();
+
+    let new_account = Account::default();
+    lock.push(new_account.clone());
+    web::Json(new_account.present(lock.len() - 1))
+}
+
+// [x] POST /accounts -> Creer un account
+// DELETE /accounts/{id} -> Supprimer un account
+// GET /accounts (INDEX) -> Recuperer tous les accounts
+// [x] GET /accounts/{id} (SHOW) -> Recuperer un account
+// [x] POST /accounts/{id}/transfer -> Effectuer une transaction

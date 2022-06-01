@@ -1,13 +1,14 @@
 #![warn(clippy::all, clippy::nursery)]
 mod account;
 mod controllers;
+mod state;
 
 use crate::account::Account;
 use crate::account_controller;
+use crate::state::State;
 use actix_web::dev::Service;
 use actix_web::{web, App, HttpServer};
 use controllers::*;
-use std::sync::RwLock;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -35,7 +36,8 @@ async fn main() -> std::io::Result<()> {
                 })
                 .service(account_controller::get_total)
                 .service(account_controller::transfer)
-                .service(account_controller::show),
+                .service(account_controller::show)
+                .service(account_controller::create),
         )
     })
     .bind(("127.0.0.1", 8080))?
