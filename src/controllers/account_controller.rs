@@ -1,4 +1,3 @@
-use crate::account::Account;
 use crate::controllers::forms::Transaction;
 use crate::controllers::presenters::AccountPresenter;
 use crate::{Account, State};

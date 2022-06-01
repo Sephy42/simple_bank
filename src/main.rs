@@ -13,10 +13,10 @@ use controllers::*;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init();
-    let account = web::Data::new(RwLock::new(Account::default()));
+    let state = web::Data::new(State::default());
     HttpServer::new(move || {
-        App::new().app_data(account.clone()).service(
-            web::scope("/api")
+        App::new().app_data(state.clone()).service(
+            web::scope("/accounts")
                 .wrap_fn(|req, srv| {
                     log::info!("{} {}", req.method(), req.path());
                     let resp = srv.call(req);
@@ -34,7 +34,6 @@ async fn main() -> std::io::Result<()> {
                         }
                     }
                 })
-                .service(account_controller::get_total)
                 .service(account_controller::transfer)
                 .service(account_controller::show)
                 .service(account_controller::create),
