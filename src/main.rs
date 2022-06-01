@@ -36,6 +36,7 @@ async fn main() -> std::io::Result<()> {
                 })
                 .service(account_controller::transfer)
                 .service(account_controller::show)
+                .service(account_controller::show_all)
                 .service(account_controller::create),
         )
     })
