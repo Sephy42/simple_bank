@@ -15,8 +15,13 @@ pub async fn show(
 }
 
 #[get("")]
-pub async fn show_all(state: web::Data<State>) -> web::Json<StatePresenter> {
-    web::Json(state.present())
+pub async fn index(state: web::Data<State>) -> web::Json<Vec<AccountPresenter>> {
+    let lock = state.accounts.read().unwrap();
+    let res = lock
+        .iter()
+        .map(|(i, account)| account.present(*i))
+        .collect();
+    web::Json(res)
 }
 
 #[post("/{id}/transfer")]
@@ -50,9 +55,3 @@ pub async fn delete(
     let account = lock.remove(&*id)?;
     Some(web::Json(account.present(*id)))
 }
-
-// [x] POST /accounts -> Creer un account
-// DELETE /accounts/{id} -> Supprimer un account
-// [x] GET /accounts (INDEX) -> Recuperer tous les accounts
-// [x] GET /accounts/{id} (SHOW) -> Recuperer un account
-// [x] POST /accounts/{id}/transfer -> Effectuer une transaction
